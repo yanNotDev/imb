@@ -7,7 +7,6 @@ import {
 } from "next-auth";
 import DiscordProvider from "next-auth/providers/discord";
 // import CredentialsProvider from "next-auth/providers/credentials";
-import GoogleProvider from "next-auth/providers/google";
 
 import { env } from "~/env.mjs";
 import { firestore } from "~/server/db";
@@ -49,11 +48,6 @@ export const authOptions: NextAuthOptions = {
     },
   },
   providers: [
-    GoogleProvider({
-      clientId: env.GOOGLE_CLIENT_ID,
-      clientSecret: env.GOOGLE_CLIENT_SECRET,
-    }),
-
     DiscordProvider({
       clientId: env.DISCORD_CLIENT_ID,
       clientSecret: env.DISCORD_CLIENT_SECRET,
@@ -88,7 +82,7 @@ export const authOptions: NextAuthOptions = {
     //     // console.log(JSON.stringify(credentials))
     //     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     //     const res = await fetch(
-    //       `https://ommc-test-portal.vercel.app/api/user`,
+    //       `https://intlmathbowl.vercel.app/api/user`,
     //       {
     //         method: "POST",
     //         body: JSON.stringify(credentials),

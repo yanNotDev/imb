@@ -8,7 +8,7 @@ export default function Document() {
 
         <meta
           name="description"
-          content="Official Sample Test Portal for the OMMC Competition. Any student 18 or younger anywhere in the world can sign up!"
+          content="Official Test Portal for the International Math Bowl (IMB) Competition. Any student 18 or younger anywhere in the world can sign up!"
         />
         <meta content="/favicon.ico" property="og:image" />
         <meta

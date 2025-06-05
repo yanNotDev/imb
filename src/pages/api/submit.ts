@@ -15,12 +15,12 @@ type SubmissionData = {
   teamMember: string;
   teamName: string;
   started: string;
-  q1: string;
-  q2: string;
-  q3: string;
+  startTimestamp: number; // Unix timestamp in milliseconds
+  answers: Record<string, string>; // Map of question IDs to answers
   username: string;
   email: string;
   image: string;
+  submitted: boolean; // Track if answers have been submitted
 };
 
 export default async function handler(
@@ -40,12 +40,12 @@ export default async function handler(
       username: data.username,
       teamName: data.teamName,
       started: data.started,
-      q1: data.q1,
-      q2: data.q2,
-      q3: data.q3,
+      startTimestamp: data.startTimestamp,
+      answers: data.answers,
       teamMembers: data.teamMember,
       email: data.email,
       image: data.image,
+      submitted: data.submitted || false,
     };
     await userDocRef.set(userDocData, { merge: true });
 

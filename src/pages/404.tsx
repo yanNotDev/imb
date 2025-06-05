@@ -11,39 +11,30 @@ export default function Error() {
       <Head>
         <title>Error 404</title>
       </Head>
-      <div className="relative h-screen overflow-hidden bg-gradient-to-tr from-red-700 via-red-600 to-red-600 font-general dark:from-red-900 dark:via-red-700 dark:to-red-500">
+      <main className="min-h-[100vh] overflow-hidden bg-white font-general duration-150 dark:bg-gray-900">
         <Navbar />
-        <div className="z-5 pattern-opacity-90 pattern-dots absolute h-[100vh] w-[100vw] duration-150 pattern-bg-gray-500 pattern-gray-700 pattern-size-6 dark:pattern-bg-gray-700 dark:pattern-gray-900"></div>
-        <header className="mx-auto flex h-[calc(100%-3.5rem)] max-w-7xl items-center justify-center py-6 px-4 sm:px-6 md:text-left lg:px-8">
-          <div className="relative z-10 grid md:grid-cols-2 md:gap-8">
-            <section className="my-auto ">
-              <div className="pb-6 text-3xl font-bold text-white lg:text-4xl ">
-                <EyeOffIcon className="mx-auto my-auto mb-4 h-12 w-12 rounded-2xl bg-gradient-to-tr  from-red-500 via-red-600 to-red-600 p-2 text-white drop-shadow-lg dark:from-red-500 dark:to-red-600 md:mx-0"></EyeOffIcon>
-                {"This page doesn't exist!"}
-              </div>
-              <div className="pb-4 text-lg font-semibold text-gray-100 md:max-w-xl  lg:pb-8 lg:text-2xl">
-                Sorry about that! Please return to the portal.
-              </div>
-              <Link href="/" className=" md:mr-4 ">
-                <button className="mx-auto flex transform select-none rounded-xl border border-transparent bg-red-600 py-3 px-4  text-base font-semibold text-white drop-shadow-lg duration-150 ease-in-out hover:scale-105 hover:bg-red-700 hover:text-gray-100 dark:bg-red-600 dark:text-gray-100 dark:hover:bg-red-700 dark:hover:text-red-400 md:mx-0 md:text-lg dark:lg:bg-red-600">
-                  Back to home{" "}
-                  <ArrowSmRightIcon className="my-auto ml-2 h-5 w-5"></ArrowSmRightIcon>
-                </button>
-              </Link>
-            </section>
-            <section className="relative mt-12 md:mt-0">
-              <Image
-                src="/images/error.webp"
-                className="relative z-10 mx-auto w-72 select-none object-contain md:w-96"
-                alt="404"
-                height={400}
-                width={400}
-              />
-              <div className="animate-blob1 absolute inset-0 left-0 right-0 top-0 bottom-0 transform-gpu rounded-full bg-red-400 opacity-[15%] blur-2xl dark:bg-red-500 "></div>
-            </section>
+        <div className="relative z-10 flex h-[calc(100vh-3.58rem)] w-full flex-col items-center justify-center px-4">
+          <div className="z-5 pattern-opacity-30 pattern-cross absolute h-[100vh] w-[100vw] duration-150 pattern-bg-white pattern-gray-200 pattern-size-8 dark:pattern-gray-800 dark:pattern-bg-gray-900"></div>
+          <div className="relative z-10 max-w-4xl text-center">
+            <EyeOffIcon className="mx-auto mb-6 h-16 w-16 rounded-2xl bg-gradient-to-r from-imb-yellow to-imb-blue p-2 text-white drop-shadow-lg" />
+            <h1 className="mb-6 text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl">
+              <span className="inline-block bg-gradient-to-r from-imb-yellow to-imb-blue bg-clip-text px-3 py-1 text-transparent">
+                Page Not Found
+              </span>
+            </h1>
+            <p className="mb-8 text-lg text-gray-600 dark:text-gray-400 sm:text-xl">
+              Sorry about that! Please return to the portal.
+            </p>
+            <Link href="/">
+              <button className="group relative inline-flex items-center justify-center overflow-hidden rounded-lg bg-gradient-to-r from-imb-yellow to-imb-blue p-[2px] text-lg font-semibold text-white transition duration-300 hover:shadow-lg hover:shadow-imb-yellow/20 focus:outline-none focus:ring-2 focus:ring-imb-yellow/50 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
+                <span className="relative flex items-center rounded-lg bg-white px-8 py-3 text-gray-900 transition duration-300 group-hover:bg-transparent group-hover:text-white dark:bg-gray-900 dark:text-white">
+                  Back to home <ArrowSmRightIcon className="ml-2 h-5 w-5" />
+                </span>
+              </button>
+            </Link>
           </div>
-        </header>
-      </div>
+        </div>
+      </main>
     </>
   );
 }

@@ -3,18 +3,18 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { ChartSquareBarIcon, UserCircleIcon } from "@heroicons/react/solid";
 import Head from "next/head";
+import { env } from "~/env.mjs";
 
 import Navbar from "./components/navbar";
 import Error from "./404";
+import { QUESTIONS, CORRECT_ANSWERS } from "../portal/test";
 
 interface Team {
   teamName: string;
   teamMembers: string; // This will be parsed into an array of TeamMember
   email: string;
-  q1: string;
+  answers: Record<string, number>; // Map of question IDs to integer answers
   image: string;
-  q2: string;
-  q3: string;
   username: string;
   started: string;
 }
@@ -33,6 +33,7 @@ const SubmissionsTable = () => {
 
   const [submissions, setSubmissions] = useState<TeamsData>({});
   const [emails, setEmails] = useState<string>("");
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const fetchSubmissions = async () => {
@@ -47,16 +48,28 @@ const SubmissionsTable = () => {
       setEmails(data.Test_Emails || "");
     };
 
+    const checkAdminStatus = async () => {
+      if (session?.user?.email) {
+        const res = await fetch(`/api/check-admin?email=${encodeURIComponent(session.user.email)}`);
+        const data = await res.json();
+        setIsAdmin(data.isAdmin);
+      }
+    };
+
     void fetchSubmissions();
     void fetchEmails();
-  }, []);
+    void checkAdminStatus();
+  }, [session?.user?.email]);
 
-  const totalCorrect = (q1: string, q2: string, q3: string): string => {
+  const totalCorrect = (answers: Record<string, number>): number => {
     let total = 0;
-    if (q1 === '"31"') total++;
-    if (q2 === '"14"') total++;
-    if (q3 === '"1/2"') total++;
-    return `Total correct: ${total}`;
+    // Compare each answer against the correct answers
+    Object.entries(CORRECT_ANSWERS).forEach(([questionId, correctAnswer]) => {
+      if (answers[questionId] === correctAnswer) {
+        total++;
+      }
+    });
+    return total;
   };
 
   const getTeams = Object.keys(submissions).length;
@@ -74,46 +87,46 @@ const SubmissionsTable = () => {
   const getNumberOfUserAccounts = (emails: string): number =>
     emails.trim() ? emails.split(/\s+/).length : 0;
 
-  const getAllEmails = (emails: string): string =>
-    emails.trim().replace(/\s+/g, ", ");
+
+  // Create a flat array of all teams with their scores for sorting
+  const sortedTeams = Object.entries(submissions)
+    .flatMap(([_, teams]) => teams)
+    .sort((a, b) => {
+      const scoreA = totalCorrect(a.answers);
+      const scoreB = totalCorrect(b.answers);
+      return scoreB - scoreA; // Sort in descending order
+    });
 
   return (
     <>
-      {session?.user?.email === "23evanchang@gmail.com" ||
-      session?.user?.email === "kk23907751@gmail.com" ||
-      session?.user?.email === "billchanghaofei@gmail.com" ? (
+      {isAdmin ? (
         <>
           <Head>
-            <title>User Submissions</title>
+            <title>Submissions</title>
           </Head>
-          <main className="min-h-[100vh] overflow-hidden bg-gray-400 font-satoshi duration-150 dark:bg-gray-900">
-            <Navbar />
-            <div className="z-2 pattern-cross absolute h-[calc(100vh-3.7rem)] w-full duration-150 pattern-bg-gray-300 pattern-gray-500 pattern-opacity-20 pattern-size-8 dark:pattern-gray-700 dark:pattern-bg-gray-900"></div>
-
-            <div className="scrollbar relative z-10 h-[calc(100vh-3.7rem)] overflow-scroll p-4">
-              <div className="mb-4 grid w-full border-collapse gap-2 overflow-hidden rounded-2xl bg-gray-200 p-4 dark:divide-gray-800 dark:bg-gray-700 md:grid-cols-2 md:gap-4">
-                <div>
-                  <h1 className="flex items-center gap-1 text-lg font-semibold">
-                    <ChartSquareBarIcon className="h-8 w-8" /> TEST STATISTICS
-                  </h1>
-                  <div className="mt-2 flex gap-2">
-                    <div className="rounded-md bg-gray-300 px-2 py-1 dark:bg-gray-800">
-                      Total User Accounts: {getNumberOfUserAccounts(emails)}
-                    </div>
-                    <div className="rounded-md bg-gray-300 px-2 py-1 dark:bg-gray-800">
-                      Total Number of Teams: {getTeams}
-                    </div>
-                    <div className="rounded-md bg-gray-300 px-2 py-1 dark:bg-gray-800">
-                      Total Number of Team Members: {getTotalTeamMembers}
-                    </div>
-                  </div>
+          <Navbar />
+          <main className="relative z-10 mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+            <div className="mb-8 flex flex-col items-center justify-between gap-4 sm:flex-row">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
+                Submissions
+              </h1>
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-800">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Total Teams</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{getTeams}</p>
                 </div>
-                <div className="overflow-hidden rounded-md bg-gray-300 shadow-inner dark:bg-gray-800">
-                  <p className="scrollbar h-20 overflow-y-scroll p-3 text-sm">
-                    {getAllEmails(emails)}
-                  </p>
+                <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-800">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Total Team Members</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{getTotalTeamMembers}</p>
+                </div>
+                <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-800">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Total User Accounts</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{getNumberOfUserAccounts(emails)}</p>
                 </div>
               </div>
+            </div>
+
+            <div className="overflow-x-auto">
               <table className="w-full border-collapse divide-y divide-gray-200 overflow-hidden rounded-2xl border border-gray-300 dark:divide-gray-800 dark:border-gray-600">
                 <thead className="bg-gray-200 text-gray-500 dark:bg-gray-800 dark:text-gray-300">
                   <tr>
@@ -132,92 +145,81 @@ const SubmissionsTable = () => {
                     <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                       Total Correct
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                      Q1
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                      Q2
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                      Q3
-                    </th>
+                    {QUESTIONS.map((question) => (
+                      <th key={question.id} className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
+                        Q{question.id}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                  {Object.entries(submissions).map(([user, teams]) =>
-                    teams.map((team) => {
-                      const members: TeamMember[] = JSON.parse(
-                        team.teamMembers || "[]"
-                      );
-                      return (
-                        <tr
-                          key={team.username}
-                          className="odd:bg-gray-100 even:bg-gray-200 dark:odd:bg-[#2d394a] dark:even:bg-gray-800"
-                        >
-                          <td className="flex items-center gap-4 whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
-                            {team.image ? (
+                <tbody className="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
+                  {sortedTeams.map((team) => {
+                    const members: TeamMember[] = JSON.parse(team.teamMembers || "[]");
+                    return (
+                      <tr key={team.email} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <td className="whitespace-nowrap px-6 py-4">
+                          <div className="flex items-center">
+                            <div className="h-10 w-10 flex-shrink-0">
                               <Image
-                                alt="Profile picture"
+                                className="h-10 w-10 rounded-full"
                                 src={team.image}
-                                className="inline rounded-full"
-                                height={50}
-                                width={50}
+                                alt=""
+                                width={40}
+                                height={40}
                               />
-                            ) : (
-                              <UserCircleIcon className="h-[50px] w-[50px]" />
-                            )}
-                            <div className="flex flex-col">
-                              <div className="text-lg">{team.username}</div>
-                              <div>{team.email}</div>
                             </div>
-                          </td>
-                          <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-800 dark:text-gray-100">
-                            {members.map((member) => (
-                              <div
-                                key={member.name}
-                                className="my-1 rounded-xl bg-gray-300 px-2 py-1 dark:bg-gray-500"
-                              >
-                                <p>
-                                  <span className="font-semibold">Name:</span>{" "}
-                                  {member.name}
-                                </p>
-                                <p>
-                                  <span className="font-semibold">Age:</span>{" "}
-                                  {member.age}
-                                </p>
-                                <p>
-                                  <span className="font-semibold">Grade:</span>{" "}
-                                  {member.grade}
-                                </p>
-                                <p>
-                                  <span className="font-semibold">School:</span>{" "}
-                                  {member.school}
-                                </p>
+                            <div className="ml-4">
+                              <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                {team.username}
                               </div>
-                            ))}
+                              <div className="text-sm text-gray-500 dark:text-gray-400">
+                                {team.email}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-800 dark:text-gray-100">
+                          {members.map((member) => (
+                            <div
+                              key={member.name}
+                              className="my-1 rounded-xl bg-gray-300 px-2 py-1 dark:bg-gray-500"
+                            >
+                              <p>
+                                <span className="font-semibold">Name:</span>{" "}
+                                {member.name}
+                              </p>
+                              <p>
+                                <span className="font-semibold">Age:</span>{" "}
+                                {member.age}
+                              </p>
+                              <p>
+                                <span className="font-semibold">Grade:</span>{" "}
+                                {member.grade}
+                              </p>
+                              <p>
+                                <span className="font-semibold">School:</span>{" "}
+                                {member.school}
+                              </p>
+                            </div>
+                          ))}
+                        </td>
+                        <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-800 dark:text-gray-100">
+                          {team.teamName}
+                        </td>
+                        <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-800 dark:text-gray-100">
+                          {team.started === "true" ? "Yes" : "No"}
+                        </td>
+                        <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-800 dark:text-gray-100">
+                          {totalCorrect(team.answers)}/{Object.keys(CORRECT_ANSWERS).length}
+                        </td>
+                        {QUESTIONS.map((question) => (
+                          <td key={question.id} className="whitespace-nowrap px-6 py-4 text-sm text-gray-800 dark:text-gray-100">
+                            {team.answers[question.id]?.toString() || ""}
                           </td>
-                          <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-800 dark:text-gray-100">
-                            {team.teamName}
-                          </td>
-                          <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-800 dark:text-gray-100">
-                            {team.started ? "✓" : "✘"}
-                          </td>
-                          <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-800 dark:text-gray-100">
-                            {totalCorrect(team.q1, team.q2, team.q3)}/3
-                          </td>
-                          <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-800 dark:text-gray-100">
-                            {team.q1.replace(/"/g, "")}
-                          </td>
-                          <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-800 dark:text-gray-100">
-                            {team.q2.replace(/"/g, "")}
-                          </td>
-                          <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-800 dark:text-gray-100">
-                            {team.q3.replace(/"/g, "")}
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
+                        ))}
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

@@ -13,12 +13,12 @@ type SubmissionData = {
   teamMember: string;
   teamName: string;
   started: string;
-  q1: string;
-  q2: string;
-  q3: string;
+  startTimestamp: number;
+  answers: Record<string, string>;
   username: string;
   email: string;
   image: string;
+  submitted: boolean;
 };
 
 type UserData = {

@@ -1,4 +1,5 @@
-import type { NextApiRequest, NextApiResponse } from "next";
+import { type NextApiRequest, type NextApiResponse } from "next";
+import { QUESTIONS } from "../../portal/test";
 import firestore from "../../firebase";
 
 type Data =
@@ -9,17 +10,15 @@ type Data =
       message: string;
     };
 
-type SubmissionData = {
-  teamMember: string;
+interface Team {
   teamName: string;
-  started: string;
-  q1: string;
-  q2: string;
-  q3: string;
-  username: string;
+  teamMembers: string;
   email: string;
+  answers: Record<string, number>; // Map of question IDs to integer answers
   image: string;
-};
+  username: string;
+  started: string;
+}
 
 export default async function handler(
   req: NextApiRequest,
@@ -38,7 +37,7 @@ export default async function handler(
     // Concatenate all emails into a single string
     let emailsString = "";
     snapshot.forEach((doc) => {
-      const data = doc.data() as SubmissionData;
+      const data = doc.data() as Team;
       emailsString += data.email + " ";
     });
 

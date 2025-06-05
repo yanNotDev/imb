@@ -20,6 +20,14 @@ const config = {
         gptLightest: "#ffb17b",
         gptDark: "#e1650e",
         gptDarker: "#c5570a",
+        imb: {
+          yellow: '#f7d861',
+          'yellow-light': '#f8e08a',
+          'yellow-dark': '#e6c84f',
+          blue: '#f6d760',
+          'blue-light': '#f7e48a',
+          'blue-dark': '#e4c54f',
+        },
       },
       keyframes: {
         wiggle: {

@@ -10,5 +10,4 @@ export const firestore = initFirestore({
     privateKey: env.FIREBASE_PRIVATE_KEY,
   }),
   projectId: env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
 });
