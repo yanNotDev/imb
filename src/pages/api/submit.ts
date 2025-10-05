@@ -5,16 +5,16 @@ import firestore from "../../firebase";
 
 type Data =
   | {
-      data: unknown;
-    }
+    data: unknown;
+  }
   | {
-      message: string;
-    };
+    message: string;
+  };
 
 type SubmissionData = {
   teamMember: string;
   teamName: string;
-  started: string;
+  started: boolean;
   startTimestamp: number; // Unix timestamp in milliseconds
   answers: Record<string, string>; // Map of question IDs to answers
   username: string;

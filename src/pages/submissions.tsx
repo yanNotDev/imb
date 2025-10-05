@@ -7,7 +7,7 @@ import { env } from "~/env.mjs";
 
 import Navbar from "./components/navbar";
 import Error from "./404";
-import { QUESTIONS, CORRECT_ANSWERS } from "../portal/test";
+import { QUESTION_COUNT } from "../portal/test";
 
 interface Team {
   teamName: string;
@@ -16,7 +16,8 @@ interface Team {
   answers: Record<string, number>; // Map of question IDs to integer answers
   image: string;
   username: string;
-  started: string;
+  started: boolean;
+  _score?: number; // server-provided score
 }
 
 interface TeamMember {
@@ -61,15 +62,8 @@ const SubmissionsTable = () => {
     void checkAdminStatus();
   }, [session?.user?.email]);
 
-  const totalCorrect = (answers: Record<string, number>): number => {
-    let total = 0;
-    // Compare each answer against the correct answers
-    Object.entries(CORRECT_ANSWERS).forEach(([questionId, correctAnswer]) => {
-      if (answers[questionId] === correctAnswer) {
-        total++;
-      }
-    });
-    return total;
+  const totalCorrect = (_team: Team): number => {
+    return typeof _team._score === 'number' ? _team._score : 0;
   };
 
   const getTeams = Object.keys(submissions).length;
@@ -92,8 +86,8 @@ const SubmissionsTable = () => {
   const sortedTeams = Object.entries(submissions)
     .flatMap(([_, teams]) => teams)
     .sort((a, b) => {
-      const scoreA = totalCorrect(a.answers);
-      const scoreB = totalCorrect(b.answers);
+      const scoreA = totalCorrect(a);
+      const scoreB = totalCorrect(b);
       return scoreB - scoreA; // Sort in descending order
     });
 
@@ -140,14 +134,11 @@ const SubmissionsTable = () => {
                       Team Name
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                      Started?
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
                       Total Correct
                     </th>
-                    {QUESTIONS.map((question) => (
-                      <th key={question.id} className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                        Q{question.id}
+                    {Array.from({ length: QUESTION_COUNT }, (_, i) => (
+                      <th key={i + 1} className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
+                        Q{i + 1}
                       </th>
                     ))}
                   </tr>
@@ -207,16 +198,16 @@ const SubmissionsTable = () => {
                           {team.teamName}
                         </td>
                         <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-800 dark:text-gray-100">
-                          {team.started === "true" ? "Yes" : "No"}
+                          {totalCorrect(team)}/{QUESTION_COUNT}
                         </td>
-                        <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-800 dark:text-gray-100">
-                          {totalCorrect(team.answers)}/{Object.keys(CORRECT_ANSWERS).length}
-                        </td>
-                        {QUESTIONS.map((question) => (
-                          <td key={question.id} className="whitespace-nowrap px-6 py-4 text-sm text-gray-800 dark:text-gray-100">
-                            {team.answers[question.id]?.toString() || ""}
-                          </td>
-                        ))}
+                        {Array.from({ length: QUESTION_COUNT }, (_, i) => {
+                          const id = String(i + 1);
+                          return (
+                            <td key={id} className="whitespace-nowrap px-6 py-4 text-sm text-gray-800 dark:text-gray-100">
+                              {team.answers[id]?.toString() || ""}
+                            </td>
+                          );
+                        })}
                       </tr>
                     );
                   })}

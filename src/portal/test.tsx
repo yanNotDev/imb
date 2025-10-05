@@ -43,21 +43,8 @@ interface Submission {
   submitted: boolean;
 }
 
-// Define the questions array - can be modified to add/remove questions
-export const QUESTIONS = [
-  { id: "1", placeholder: "Enter an integer answer" },
-  { id: "2", placeholder: "Enter an integer answer" },
-  { id: "3", placeholder: "Enter an integer answer" },
-  // Add more questions as needed
-];
-
-// Define correct answers for each question
-export const CORRECT_ANSWERS: Record<string, number> = {
-  "1": 15552,
-  "2": 2,
-  "3": 108,
-  // Add more correct answers as needed
-};
+// Total number of questions (client only needs the count)
+export const QUESTION_COUNT = 4; // Increase as needed
 
 interface Props {
   started: boolean;
@@ -231,7 +218,7 @@ const Test: React.FC<Props> = ({ started, setStarted }) => {
           email: session?.user?.email || "",
           image: session?.user?.image || "",
           submitted: false,
-          started: "true"
+          started: true
         }),
       });
 
@@ -258,7 +245,7 @@ const Test: React.FC<Props> = ({ started, setStarted }) => {
         body: JSON.stringify({
           teamMember: JSON.stringify(teamMembers),
           teamName: teamName,
-          started: "true",
+          started: true,
           startTimestamp: serverTimestamp,
           answers: answers,
           username: session?.user?.name || "",
@@ -291,7 +278,7 @@ const Test: React.FC<Props> = ({ started, setStarted }) => {
           <CheckIcon className="mr-2 h-5 w-5" /> Submitted!
         </button>
       );
-    } else if (Object.keys(answers).length === QUESTIONS.length && areAllAnswersValid()) {
+    } else if (Object.keys(answers).length === QUESTION_COUNT && areAllAnswersValid()) {
       return (
         <button
           onClick={() => setShowModal(true)}
@@ -311,26 +298,31 @@ const Test: React.FC<Props> = ({ started, setStarted }) => {
 
   // Function to validate all answers are valid integers
   const areAllAnswersValid = (): boolean => {
-    return Object.keys(answers).length === QUESTIONS.length && 
-           Object.values(answers).every(answer => Number.isInteger(answer));
+    return Object.keys(answers).length === QUESTION_COUNT &&
+      Object.values(answers).every(answer => Number.isInteger(answer));
   };
 
   const addMember = () => {
-    if (
+    const ageNum = Number(age);
+    const gradeNum = Number(grade);
+    const valid = (
       newMember.trim() !== "" &&
       age.trim() !== "" &&
       grade.trim() !== "" &&
-      school.trim() !== ""
-    ) {
-      setTeamMembers([
-        ...teamMembers,
-        { name: newMember.trim(), age, grade, school },
-      ]);
-      setNewMember("");
-      setAge("");
-      setGrade("");
-      setSchool("");
-    }
+      school.trim() !== "" &&
+      !Number.isNaN(ageNum) && ageNum >= 1 && ageNum <= 18 &&
+      !Number.isNaN(gradeNum) && gradeNum >= 1 && gradeNum <= 12
+    );
+    if (!valid) return;
+
+    setTeamMembers([
+      ...teamMembers,
+      { name: newMember.trim(), age: String(ageNum), grade: String(gradeNum), school },
+    ]);
+    setNewMember("");
+    setAge("");
+    setGrade("");
+    setSchool("");
   };
 
   const removeMember = (index: number) => {
@@ -371,7 +363,7 @@ const Test: React.FC<Props> = ({ started, setStarted }) => {
               startTimestamp={serverTimestamp}
               onTimeUp={handleTimeUp}
               isSubmitted={submitted}
-              duration={90}
+              duration={30}
             />
           )}
 
@@ -390,16 +382,19 @@ const Test: React.FC<Props> = ({ started, setStarted }) => {
             </div>
           </div>
           <div className={gridHandler()}>
-            {QUESTIONS.map((question) => (
-              <Question
-                key={question.id}
-                id={question.id}
-                value={answers[question.id] ?? null}
-                onChange={(value) => updateAnswer(question.id, value)}
-                placeholder={question.placeholder}
-                disabled={submitted}
-              />
-            ))}
+            {Array.from({ length: QUESTION_COUNT }, (_, i) => {
+              const id = String(i + 1);
+              return (
+                <Question
+                  key={id}
+                  id={id}
+                  value={answers[id] ?? null}
+                  onChange={(value) => updateAnswer(id, value)}
+                  placeholder="Enter an integer answer"
+                  disabled={submitted}
+                />
+              );
+            })}
           </div>
           {!submitted && buttonSelector()}
         </div>
@@ -411,7 +406,7 @@ const Test: React.FC<Props> = ({ started, setStarted }) => {
               <span className="bg-gradient-to-r from-imb-yellow to-imb-blue bg-clip-text text-transparent">
                 IMB 
               </span>{" "}
-              Test!
+              Open Round!
             </h1>
             <div className="mb-8 rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
               <h2 className="mb-4 flex items-center text-xl font-bold text-gray-900 dark:text-white">
@@ -458,7 +453,7 @@ const Test: React.FC<Props> = ({ started, setStarted }) => {
                   placeholder="Enter your team name"
                   required
                   onChange={(event) => setTeamName(event.target.value)}
-                  maxLength={30}
+                  maxLength={60}
                   value={teamName}
                 />
               </div>
@@ -509,7 +504,7 @@ const Test: React.FC<Props> = ({ started, setStarted }) => {
                         placeholder="Add a team member"
                         value={newMember}
                         onChange={(event) => setNewMember(event.target.value)}
-                        maxLength={20}
+                        maxLength={40}
                         required={teamMembers.length < 1}
                       />
                       <input
@@ -517,9 +512,17 @@ const Test: React.FC<Props> = ({ started, setStarted }) => {
                         type="number"
                         placeholder="Age"
                         value={age}
-                        onChange={(event) => setAge(event.target.value)}
+                        onChange={(event) => {
+                          const raw = event.target.value;
+                          if (raw === "") { setAge(""); return; }
+                          let num = Number(raw);
+                          if (Number.isNaN(num)) { return; }
+                          if (num < 1) num = 1;
+                          if (num > 18) num = 18;
+                          setAge(String(num));
+                        }}
                         max={18}
-                        min={0}
+                        min={1}
                         required={teamMembers.length < 1}
                       />
                       <input
@@ -527,9 +530,17 @@ const Test: React.FC<Props> = ({ started, setStarted }) => {
                         type="number"
                         placeholder="Grade"
                         value={grade}
-                        onChange={(event) => setGrade(event.target.value)}
+                        onChange={(event) => {
+                          const raw = event.target.value;
+                          if (raw === "") { setGrade(""); return; }
+                          let num = Number(raw);
+                          if (Number.isNaN(num)) { return; }
+                          if (num < 1) num = 1;
+                          if (num > 12) num = 12;
+                          setGrade(String(num));
+                        }}
                         max={12}
-                        min={0}
+                        min={1}
                         required={teamMembers.length < 1}
                       />
                       <input
@@ -538,7 +549,7 @@ const Test: React.FC<Props> = ({ started, setStarted }) => {
                         placeholder="School Name"
                         value={school}
                         onChange={(event) => setSchool(event.target.value)}
-                        maxLength={30}
+                        maxLength={80}
                         required={teamMembers.length < 1}
                       />
                       <button

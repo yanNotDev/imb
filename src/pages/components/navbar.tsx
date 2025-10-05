@@ -4,7 +4,7 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { QUESTIONS } from "../../portal/test";
+import { QUESTION_COUNT } from "../../portal/test";
 import {
   SunIcon,
   MoonIcon,
@@ -55,9 +55,9 @@ const Navbar = () => {
 
   const handleSignOut = async () => {
     // Clear all question-related localStorage items
-    QUESTIONS.forEach(question => {
-      localStorage.removeItem(`Q${question.id}`);
-    });
+    for (let i = 1; i <= QUESTION_COUNT; i++) {
+      localStorage.removeItem(`Q${i}`);
+    }
     // Clear other localStorage items
     localStorage.removeItem("teamName");
     localStorage.removeItem("teamMembers");
@@ -83,7 +83,7 @@ const Navbar = () => {
           </Link>
           <h1 className="relative hidden select-none text-2xl font-extrabold tracking-tight duration-75 dark:text-white sm:inline lg:text-3xl 2xl:text-4xl">
             <span className="bg-gradient-to-r from-imb-yellow to-imb-blue bg-clip-text text-transparent">
-              IMB Test Portal
+              IMB Competition Portal
             </span>
           </h1>
         </div>

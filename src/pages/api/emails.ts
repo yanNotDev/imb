@@ -1,5 +1,4 @@
 import { type NextApiRequest, type NextApiResponse } from "next";
-import { QUESTIONS } from "../../portal/test";
 import firestore from "../../firebase";
 
 type Data =
@@ -17,7 +16,7 @@ interface Team {
   answers: Record<string, number>; // Map of question IDs to integer answers
   image: string;
   username: string;
-  started: string;
+  started: boolean;
 }
 
 export default async function handler(

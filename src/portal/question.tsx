@@ -48,9 +48,6 @@ const Question: React.FC<Props> = ({ id, value, onChange, placeholder, disabled 
         maxLength={10} // Reasonable max length for integers
         disabled={disabled}
       />
-      <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-        Enter an integer answer (positive or negative)
-      </p>
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import firestore from "../../firebase";
+import { scoreAnswers } from "../../server/correctAnswers";
 
 type Data =
   | {
@@ -12,7 +13,7 @@ type Data =
 type SubmissionData = {
   teamMember: string;
   teamName: string;
-  started: string;
+  started: boolean;
   startTimestamp: number;
   answers: Record<string, string>;
   username: string;
@@ -21,8 +22,11 @@ type SubmissionData = {
   submitted: boolean;
 };
 
+// Augmented response type including server computed score (non-persistent)
+type SubmissionWithScore = SubmissionData & { _score: number };
+
 type UserData = {
-  [key: string]: SubmissionData[];
+  [key: string]: SubmissionWithScore[];
 };
 
 export default async function handler(
@@ -46,7 +50,9 @@ export default async function handler(
       if (!userData[user]) {
         userData[user] = [];
       }
-      userData[user]?.push(data);
+      const numericAnswers: Record<string, number | string> = data.answers || {};
+      const _score = scoreAnswers(numericAnswers);
+      userData[user]?.push({ ...data, _score });
     });
 
     return res.status(200).json(userData); // return the userData object

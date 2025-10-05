@@ -46,7 +46,7 @@ const Modal: React.FC<Props> = ({
       body: JSON.stringify({
         teamMember: JSON.stringify(teamMembers),
         teamName: teamName,
-        started: "true",
+        started: true,
         answers: answers,
         username: session?.user.name || "",
         email: session?.user.email || "",
@@ -86,7 +86,7 @@ const Modal: React.FC<Props> = ({
                   <>
                     <p>You will be able to submit another set of answers.</p>
                     <p className="mt-2 text-base">
-                      Submitting for Team {teamName}:
+                      Submitting for {teamName}:
                     </p>
                     <div className="mt-2 flex flex-row gap-2">
                       {teamMembers.map((member) => (

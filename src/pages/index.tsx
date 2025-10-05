@@ -12,7 +12,7 @@ const Home: NextPage = () => {
   return (
     <>
       <Head>
-        <title>IMB Test Portal</title>
+        <title>IMB Competition Portal</title>
       </Head>
       <main className="min-h-[100vh] overflow-hidden bg-white font-general duration-150 dark:bg-gray-900">
         <Navbar />
@@ -26,9 +26,6 @@ const Home: NextPage = () => {
                   IMB 2025
               </span>
               </h1>
-              <p className="mb-8 text-lg text-gray-600 dark:text-gray-400 sm:text-xl">
-                Join the International Math Bowl and showcase your mathematical prowess in this exciting competition!
-              </p>
             <button
                 onClick={() => void signIn("discord")}
                 className="group relative inline-flex items-center justify-center overflow-hidden rounded-lg bg-gradient-to-r from-imb-yellow to-imb-blue p-[2px] text-lg font-semibold text-white transition duration-300 hover:shadow-lg hover:shadow-imb-yellow/20 focus:outline-none focus:ring-2 focus:ring-imb-yellow/50 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
